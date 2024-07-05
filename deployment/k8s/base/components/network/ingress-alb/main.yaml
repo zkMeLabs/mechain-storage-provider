@@ -25,21 +25,23 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: null
-      http:
-        paths:
-          - backend:
-              service:
-                name: ingress-nginx-controller
-                port:
-                  number: 80
-            pathType: ImplementationSpecific
-    - host: null
-      http:
-        paths:
-          - backend:
-              service:
-                name: ingress-nginx-controller
-                port:
-                  number: 80
-            pathType: ImplementationSpecific
+  - host: null
+    http:
+      paths:
+      - backend:
+          service:
+            name: ingress-nginx-controller
+            port:
+              number: 80
+        pathType: ImplementationSpecific
+  - host: null
+    http:
+      paths:
+      - backend:
+          service:
+            name: ingress-nginx-controller
+            port:
+              number: 80
+        pathType: ImplementationSpecific
+
+
