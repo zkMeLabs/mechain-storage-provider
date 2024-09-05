@@ -1,0 +1,106 @@
+version: '3'
+services:
+  node0:
+    container_name: mechain-sp-0
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9033:9033"
+      - "9063:9063"
+      - "9400:9400"
+      - "9401:9401"
+      - "9402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp0:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node1:
+    container_name: mechain-sp-1
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9034:9033"
+      - "9064:9063"
+      - "10400:9400"
+      - "10401:9401"
+      - "10402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp1:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node2:
+    container_name: mechain-sp-2
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9035:9033"
+      - "9065:9063"
+      - "11400:9400"
+      - "11401:9401"
+      - "11402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp2:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node3:
+    container_name: mechain-sp-3
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9036:9033"
+      - "9066:9063"
+      - "12400:9400"
+      - "12401:9401"
+      - "12402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp3:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node4:
+    container_name: mechain-sp-4
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9037:9033"
+      - "9067:9063"
+      - "13400:9400"
+      - "13401:9401"
+      - "13402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp4:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node5:
+    container_name: mechain-sp-5
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9038:9033"
+      - "9068:9063"
+      - "14400:9400"
+      - "14401:9401"
+      - "14402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp5:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node6:
+    container_name: mechain-sp-6
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9039:9033"
+      - "9069:9063"
+      - "15400:9400"
+      - "15401:9401"
+      - "15402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp6:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml
+  node7:
+    container_name: mechain-sp-7
+    image: "zkmelabs/mechain-storage-provider"
+    ports:
+      - "9040:9033"
+      - "9070:9063"
+      - "16400:9400"
+      - "16401:9401"
+      - "16402:9402"
+    volumes:
+      - "./deployment/dockerup/local_env/sp7:/sp:Z"
+    command: >
+      /usr/bin/mechain-sp --config /sp/config.toml

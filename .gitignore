@@ -29,9 +29,13 @@ build/
 # Log files
 logs/
 
-# Local deployment
+# localup
 deployment/localup/local_env/
-deployment/local
+
+# devnetup
 deployment/devnetup/local_env/
-greenfield/
+
+# dockerup
+deployment/dockerup/local_env/
+
 sp.json

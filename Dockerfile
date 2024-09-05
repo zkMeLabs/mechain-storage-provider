@@ -1,19 +1,15 @@
-FROM golang:1.22.4-alpine as builder
+FROM golang:1.22.4-bullseye AS builder
 
-# ENV CGO_CFLAGS="-O -D__BLST_PORTABLE__"
-# ENV CGO_CFLAGS_ALLOW="-O -D__BLST_PORTABLE__"
+ENV CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+ENV CGO_CFLAGS_ALLOW="-O -D__BLST_PORTABLE__"
 # ENV CGO_ENABLED=1
 # ENV GO111MODULE=on
 
-RUN apk add --no-cache make git bash protoc build-base libc-dev
-
-WORKDIR /mechain-storage-provider
-
+# RUN apk add --no-cache make git bash protoc build-base libc-dev
+WORKDIR /workspace
 COPY . .
-
 RUN  make build
 
-# Pull greenfield into a second stage deploy alpine container
-FROM alpine:3.17
-COPY --from=builder /mechain-storage-provider/build/mechain-sp /usr/bin/mechain-sp
+FROM golang:1.22.4-bullseye
+COPY --from=builder /workspace/build/mechain-sp /usr/bin/mechain-sp
 CMD ["mechain-sp"]
