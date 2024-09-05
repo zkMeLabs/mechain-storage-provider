@@ -18,9 +18,9 @@ services:
       - "{{.PprofPort}}:{{$.BasePorts.PprofPort}}"
       - "{{.ProbePort}}:{{$.BasePorts.ProbePort}}"
     volumes:
-      - "{{$.VolumeBasePath}}/sp{{.NodeIndex}}:/sp:Z"
+      - "{{$.VolumeBasePath}}/sp{{.NodeIndex}}:/app:Z"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/config.toml
 {{- end }}
 `
 
