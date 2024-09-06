@@ -39,3 +39,4 @@ deployment/devnetup/local_env
 deployment/dockerup/local_env
 
 sp.json
+deployment/dockerup/initdb_done

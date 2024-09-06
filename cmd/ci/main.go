@@ -25,7 +25,8 @@ services:
     container_name: initdb
     image: "{{$.Image}}"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     volumes:
       - "{{$.ProjectBasePath}}/sp.json:/workspace/sp.json:Z"
       - "{{$.ProjectBasePath}}/deployment/dockerup:/workspace/deployment/dockerup:Z"
@@ -33,15 +34,16 @@ services:
     working_dir: "/workspace/deployment/dockerup"
     command: >
       bash -c "
+      rm -f initdb_done &&
       mkdir -p /workspace/build &&
       cp /usr/bin/mechain-sp /workspace/build/mechain-sp &&
       bash localup.sh --generate /workspace/sp.json root mechain mysql:3306 && 
       bash localup.sh --reset &&
-      touch local_env/initdb_done && 
+      touch initdb_done && 
       sleep infinity
       "
     healthcheck:
-      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/local_env/initdb_done && echo 'OK' || exit 1"]
+      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/initdb_done && echo 'OK' || exit 1"]
       interval: 10s
       retries: 5
     restart: "on-failure"

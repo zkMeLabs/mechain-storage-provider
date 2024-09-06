@@ -230,18 +230,6 @@ function print_work_dir() {
   done
 }
 
-##############
-# rebuild sp #
-##############
-function rebuild() {
-  bash "${workspace}/../../build.sh"
-  mkdir -p "${workspace}/${SP_DEPLOY_DIR}"
-  for ((i = 0; i < SP_NUM; i++)); do
-    mkdir -p "${workspace}/${SP_DEPLOY_DIR}/sp${i}"
-    cp -rf "${bin}" "${workspace}/${SP_DEPLOY_DIR}/sp${i}/${bin_name}${i}"
-  done
-}
-
 ######################
 # clean local sp env #
 ######################
@@ -256,7 +244,6 @@ function reset_sp() {
   stop_sp
   reset_sql_db
   reset_piece_store
-  rebuild
   make_config
 }
 
