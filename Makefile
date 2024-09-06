@@ -97,12 +97,13 @@ build-docker:
 ###                        Docker Compose                                   ###
 ###############################################################################
 build-dcf:
-	go run cmd/docker-compose/main.go
+	go run cmd/ci/main.go
 
 start-dc:
 	docker compose up -d
+	docker compose ps
 	
 stop-dc:
-	docker compose down
+	docker compose down --volumes
 
 .PHONY: build-dcf start-dc stop-dc

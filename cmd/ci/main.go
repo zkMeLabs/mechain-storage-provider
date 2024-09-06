@@ -5,11 +5,52 @@ import (
 	"text/template"
 )
 
-const composeTemplate = `version: '3'
+const composeTemplate = `
 services:
+  mysql:
+    image: {{.MySQLImage}}
+    container_name: sp-mysql
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mechain
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  initdb:
+    container_name: initdb
+    image: "{{$.Image}}"
+    depends_on:
+      - mysql
+    volumes:
+      - "{{$.ProjectBasePath}}/sp.json:/workspace/sp.json:Z"
+      - "{{$.ProjectBasePath}}/deployment/dockerup:/workspace/deployment/dockerup:Z"
+      - "local-env:/workspace/deployment/dockerup/local_env"
+    working_dir: "/workspace/deployment/dockerup"
+    command: >
+      bash -c "
+      mkdir -p /workspace/build &&
+      cp /usr/bin/mechain-sp /workspace/build/mechain-sp &&
+      bash localup.sh --generate /workspace/sp.json root mechain mysql:3306 && 
+      bash localup.sh --reset &&
+      touch local_env/initdb_done && 
+      sleep infinity
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/local_env/initdb_done && echo 'OK' || exit 1"]
+      interval: 10s
+      retries: 5
+    restart: "on-failure"
 {{- range .Nodes }}
   node{{.NodeIndex}}:
     container_name: mechain-sp-{{.NodeIndex}}
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "{{$.Image}}"
     ports:
       - "{{.GRPCPort}}:{{$.BasePorts.GRPCPort}}"
@@ -18,10 +59,13 @@ services:
       - "{{.PprofPort}}:{{$.BasePorts.PprofPort}}"
       - "{{.ProbePort}}:{{$.BasePorts.ProbePort}}"
     volumes:
-      - "{{$.VolumeBasePath}}/sp{{.NodeIndex}}:/app:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /app/config.toml
+      /usr/bin/mechain-sp --config /app/sp{{.NodeIndex}}/config.toml
 {{- end }}
+volumes:
+  db-data:
+  local-env:
 `
 
 type basePorts struct {
@@ -37,10 +81,11 @@ type NodeConfig struct {
 }
 
 type ComposeConfig struct {
-	Nodes          []NodeConfig
-	Image          string
-	VolumeBasePath string
-	BasePorts      basePorts
+	Nodes           []NodeConfig
+	Image           string
+	MySQLImage      string
+	ProjectBasePath string
+	BasePorts       basePorts
 }
 
 func main() {
@@ -68,10 +113,11 @@ func main() {
 		}
 	}
 	composeConfig := ComposeConfig{
-		Nodes:          nodes,
-		Image:          "zkmelabs/mechain-storage-provider",
-		VolumeBasePath: "./deployment/dockerup/local_env",
-		BasePorts:      bp,
+		Nodes:           nodes,
+		Image:           "zkmelabs/mechain-storage-provider",
+		MySQLImage:      "mysql:8",
+		ProjectBasePath: ".",
+		BasePorts:       bp,
 	}
 
 	tpl, err := template.New("docker-compose").Parse(composeTemplate)

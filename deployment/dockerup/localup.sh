@@ -32,9 +32,6 @@ function generate_sp_db_info() {
     echo "failed to generate sp.info and db.info, please check args by help info"
     exit 1
   fi
-  bash "${workspace}/../../build.sh"
-  mkdir -p "${workspace}/${SP_DEPLOY_DIR}"
-
   sp_json_file=$1
   db_user=$2
   db_password=$3
@@ -43,7 +40,7 @@ function generate_sp_db_info() {
     mkdir -p "${workspace}/${SP_DEPLOY_DIR}/sp${i}"
     cp -rf "${bin}" "${workspace}/${SP_DEPLOY_DIR}/sp${i}/${bin_name}${i}"
     cd "${workspace}/${SP_DEPLOY_DIR}/sp${i}" || exit 1
-    ./${bin_name}${i} config.dump
+    "${workspace}/${SP_DEPLOY_DIR}/sp${i}/${bin_name}${i}" config.dump
 
     # generate sp info
     endpoint="0.0.0.0:${SP_START_ENDPOINT_PORT}"

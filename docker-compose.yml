@@ -1,7 +1,48 @@
-version: '3'
+
 services:
+  mysql:
+    image: mysql:8
+    container_name: sp-mysql
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mechain
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  initdb:
+    container_name: initdb
+    image: "zkmelabs/mechain-storage-provider"
+    depends_on:
+      - mysql
+    volumes:
+      - "./sp.json:/workspace/sp.json:Z"
+      - "./deployment/dockerup:/workspace/deployment/dockerup:Z"
+      - "local-env:/workspace/deployment/dockerup/local_env"
+    working_dir: "/workspace/deployment/dockerup"
+    command: >
+      bash -c "
+      mkdir -p /workspace/build &&
+      cp /usr/bin/mechain-sp /workspace/build/mechain-sp &&
+      bash localup.sh --generate /workspace/sp.json root mechain mysql:3306 && 
+      bash localup.sh --reset &&
+      touch local_env/initdb_done && 
+      sleep infinity
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/local_env/initdb_done && echo 'OK' || exit 1"]
+      interval: 10s
+      retries: 5
+    restart: "on-failure"
   node0:
     container_name: mechain-sp-0
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9033:9033"
@@ -10,11 +51,14 @@ services:
       - "9401:9401"
       - "9402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp0:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp0/config.toml
   node1:
     container_name: mechain-sp-1
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9034:9033"
@@ -23,11 +67,14 @@ services:
       - "10401:9401"
       - "10402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp1:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp1/config.toml
   node2:
     container_name: mechain-sp-2
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9035:9033"
@@ -36,11 +83,14 @@ services:
       - "11401:9401"
       - "11402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp2:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp2/config.toml
   node3:
     container_name: mechain-sp-3
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9036:9033"
@@ -49,11 +99,14 @@ services:
       - "12401:9401"
       - "12402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp3:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp3/config.toml
   node4:
     container_name: mechain-sp-4
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9037:9033"
@@ -62,11 +115,14 @@ services:
       - "13401:9401"
       - "13402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp4:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp4/config.toml
   node5:
     container_name: mechain-sp-5
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9038:9033"
@@ -75,11 +131,14 @@ services:
       - "14401:9401"
       - "14402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp5:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp5/config.toml
   node6:
     container_name: mechain-sp-6
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9039:9033"
@@ -88,11 +147,14 @@ services:
       - "15401:9401"
       - "15402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp6:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp6/config.toml
   node7:
     container_name: mechain-sp-7
+    depends_on:
+      initdb:
+        condition: service_healthy
     image: "zkmelabs/mechain-storage-provider"
     ports:
       - "9040:9033"
@@ -101,6 +163,9 @@ services:
       - "16401:9401"
       - "16402:9402"
     volumes:
-      - "./deployment/dockerup/local_env/sp7:/sp:Z"
+      - "local-env:/app"
     command: >
-      /usr/bin/mechain-sp --config /sp/config.toml
+      /usr/bin/mechain-sp --config /app/sp7/config.toml
+volumes:
+  db-data:
+  local-env:
