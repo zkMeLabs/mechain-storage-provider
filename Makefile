@@ -1,13 +1,7 @@
 SHELL := /bin/bash
-DOCKER := $(shell which docker)
-DOCKER_IMAGE := zkmelabs/mechain-storage-provider
-COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
-DOCKER_TAG := $(COMMIT_HASH)
-
 
 .PHONY: all build clean format install-tools generate lint mock-gen test tidy vet buf-gen proto-clean
 .PHONY: install-go-test-coverage check-coverage
-.PHONY: build-docker
 
 help:
 	@echo "Please use \`make <target>\` where <target> is one of"
@@ -85,11 +79,23 @@ proto-format:
 proto-format-check:
 	buf format --diff --exit-code
 
+###############################################################################
+###                        Docker                                           ###
+###############################################################################
+DOCKER := $(shell which docker)
+DOCKER_IMAGE := zkmelabs/mechain-storage-provider
+COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
+DOCKER_TAG := $(COMMIT_HASH)
+
 build-docker:
 	$(DOCKER) build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 	$(DOCKER) tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
 	$(DOCKER) tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
 
+.PHONY: build-docker
+###############################################################################
+###                        Docker Compose                                   ###
+###############################################################################
 build-dcf:
 	go run cmd/docker-compose/main.go
 

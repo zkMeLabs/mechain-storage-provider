@@ -2,7 +2,7 @@
 
 basedir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 workspace=${basedir}
-source "${workspace}"/env.info
+source "${workspace}/env.info"
 bin_name=mechain-sp
 bin="$(realpath "${workspace}/../../build/${bin_name}")"
 
@@ -192,7 +192,7 @@ function start_sp() {
 # stop sps #
 ############
 function stop_sp() {
-  kill -9 $(LC_ALL=C pgrep -f ${bin_name})
+  kill -9 $(LC_ALL=C pgrep -f ${bin_name}) >/dev/null 2>&1
   echo "succeed to stop storage providers"
 }
 
