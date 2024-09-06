@@ -29,13 +29,13 @@ build/
 # Log files
 logs/
 
-# localup
-deployment/localup/local_env/
+# Localup
+deployment/localup/local_env
 
 # devnetup
-deployment/devnetup/local_env/
+deployment/devnetup/local_env
 
 # dockerup
-deployment/dockerup/local_env/
+deployment/dockerup/local_env
 
 sp.json
