@@ -50,7 +50,7 @@ function generate_sp_db_info() {
 
     # generate sp info
     i_port=$(expr ${SP_START_ENDPOINT_PORT} + $i)
-    endpoint="127.0.0.1:${i_port}"
+    endpoint="0.0.0.0:${i_port}"
     {
       echo "#!/usr/bin/env bash"
       echo "SP_ENDPOINT=\"${endpoint}\""
@@ -95,7 +95,7 @@ function make_config() {
     source db.info
     source sp.info
     # app
-    sed -i -e "s/GRPCAddress = '.*'/GRPCAddress = '127.0.0.1:${cur_port}'/g" config.toml
+    sed -i -e "s/GRPCAddress = '.*'/GRPCAddress = '0.0.0.0:${cur_port}'/g" config.toml
 
     # db
     sed -i -e "s/User = '.*'/User = '${USER}'/g" config.toml
@@ -127,12 +127,12 @@ function make_config() {
 
     # p2p
     if [ ${index} -eq 0 ]; then
-      sed -i -e "s/P2PAddress = '.*'/P2PAddress = '127.0.0.1:9633'/g" config.toml
+      sed -i -e "s/P2PAddress = '.*'/P2PAddress = '0.0.0.0:9633'/g" config.toml
       sed -i -e "s/P2PPrivateKey = '.*'/P2PPrivateKey = '${SP0_P2P_PRIVATE_KEY}'/g" config.toml
     else
-      p2p_port="127.0.0.1:"$((SP_START_PORT + 1000 * $index + 1))
+      p2p_port="0.0.0.0:"$((SP_START_PORT + 1000 * $index + 1))
       sed -i -e "s/P2PAddress = '.*'/P2PAddress = '${p2p_port}'/g" config.toml
-      sed -i -e "s/Bootstrap = \[\]/Bootstrap = \[\'16Uiu2HAmG4KTyFsK71BVwjY4z6WwcNBVb6vAiuuL9ASWdqiTzNZH@127.0.0.1:9633\'\]/g" config.toml
+      sed -i -e "s/Bootstrap = \[\]/Bootstrap = \[\'16Uiu2HAmG4KTyFsK71BVwjY4z6WwcNBVb6vAiuuL9ASWdqiTzNZH@172.17.0.1:9633\'\]/g" config.toml
     fi
 
     sed -i -e "s/MaxExecuteNumber = .*/MaxExecuteNumber = 1/g" config.toml
@@ -141,11 +141,11 @@ function make_config() {
     #sed -i -e "s/DisableMetrics = false/DisableMetrics = true/" config.toml
     #sed -i -e "s/DisablePProf = false/DisablePProf = true/" config.toml
     #sed -i -e "s/DisableProbe = false/DisableProbe = true/" config.toml
-    metrics_address="127.0.0.1:"$((SP_START_PORT + 1000 * $index + 367))
+    metrics_address="0.0.0.0:"$((SP_START_PORT + 1000 * $index + 367))
     sed -i -e "s/MetricsHTTPAddress = '.*'/MetricsHTTPAddress = '${metrics_address}'/g" config.toml
-    pprof_address="127.0.0.1:"$((SP_START_PORT + 1000 * $index + 368))
+    pprof_address="0.0.0.0:"$((SP_START_PORT + 1000 * $index + 368))
     sed -i -e "s/PProfHTTPAddress = '.*'/PProfHTTPAddress = '${pprof_address}'/g" config.toml
-    probe_address="127.0.0.1:"$((SP_START_PORT + 1000 * $index + 369))
+    probe_address="0.0.0.0:"$((SP_START_PORT + 1000 * $index + 369))
     sed -i -e "s/ProbeHTTPAddress = '.*'/ProbeHTTPAddress = '${probe_address}'/g" config.toml
 
     # blocksyncer
@@ -186,20 +186,43 @@ function make_config() {
 function start_sp() {
   index=0
   for sp_dir in ${workspace}/${SP_DEPLOY_DIR}/*; do
-    cd ${sp_dir} || exit 1
-    nohup ./${sp_bin_name}${index} --config config.toml </dev/null >log.txt 2>&1 &
-    echo "succeed to start sp in "${sp_dir}
-    cd - >/dev/null
+    endpoint_port=$(expr ${SP_START_ENDPOINT_PORT} + $index)
+    grpc_port=$((SP_START_PORT + 1000 * $index))
+    p2p_port=$((SP_START_PORT + 1000 * $index + 1))
+    metrics_port=$((SP_START_PORT + 1000 * $index + 367))
+    pprof_port=$((SP_START_PORT + 1000 * $index + 368))
+    probe_port=$((SP_START_PORT + 1000 * $index + 369))
+    if [ "$index" -eq 0 ]; then
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+            -p ${endpoint_port}:${endpoint_port} \
+            -p ${grpc_port}:${grpc_port} \
+            -p 9633:9633 \
+            -p ${metrics_port}:${metrics_port} \
+            -p ${pprof_port}:${pprof_port} \
+            -p ${probe_port}:${probe_port} \
+            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+      echo "succeed to start sp0!"
+    else
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+            -p ${endpoint_port}:${endpoint_port} \
+            -p ${grpc_port}:${grpc_port} \
+            -p ${p2p_port}:${p2p_port} \
+            -p ${metrics_port}:${metrics_port} \
+            -p ${pprof_port}:${pprof_port} \
+            -p ${probe_port}:${probe_port} \
+            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+      echo "succeed to start sp${index}"
+    fi
     index=$(($index + 1))
   done
-  echo "succeed to start storage providers"
+  echo "succeed to start all storage providers!"
 }
 
 ############
 # stop sps #
 ############
 function stop_sp() {
-  kill -9 $(LC_ALL=C pgrep -f ${sp_bin_name}) >/dev/null 2>&1
+  docker rm -f $(docker ps -a | grep mechain-sp | awk '{print $1}')
   echo "succeed to stop storage providers"
 }
 
