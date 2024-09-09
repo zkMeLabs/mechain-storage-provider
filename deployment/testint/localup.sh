@@ -44,7 +44,6 @@ function generate_sp_db_info() {
   db_address=$4
   for ((i = 0; i < ${SP_NUM}; i++)); do
     mkdir -p ${workspace}/${SP_DEPLOY_DIR}/sp${i}
-    cp -rf ${sp_bin} ${workspace}/${SP_DEPLOY_DIR}/sp${i}/${sp_bin_name}${i}
     cd ${workspace}/${SP_DEPLOY_DIR}/sp${i}/ || exit 1
     ./${sp_bin_name}${i} config.dump
 

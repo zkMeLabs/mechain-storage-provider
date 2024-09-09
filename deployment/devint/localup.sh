@@ -44,7 +44,6 @@ function generate_sp_db_info() {
   db_address=$4
   for ((i = 0; i < ${SP_NUM}; i++)); do
     mkdir -p ${workspace}/${SP_DEPLOY_DIR}/sp${i}
-    cp -rf ${sp_bin} ${workspace}/${SP_DEPLOY_DIR}/sp${i}/${sp_bin_name}${i}
     cd ${workspace}/${SP_DEPLOY_DIR}/sp${i}/ || exit 1
     ./${sp_bin_name}${i} config.dump
 
@@ -193,24 +192,24 @@ function start_sp() {
     pprof_port=$((SP_START_PORT + 1000 * $index + 368))
     probe_port=$((SP_START_PORT + 1000 * $index + 369))
     if [ "$index" -eq 0 ]; then
-      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app \
             -p ${endpoint_port}:${endpoint_port} \
             -p ${grpc_port}:${grpc_port} \
             -p 9633:9633 \
             -p ${metrics_port}:${metrics_port} \
             -p ${pprof_port}:${pprof_port} \
             -p ${probe_port}:${probe_port} \
-            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+            -d kevin2025/mechain-storage-provider ${sp_bin_name} --config ./config.toml
       echo "succeed to start sp0!"
     else
-      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app \
             -p ${endpoint_port}:${endpoint_port} \
             -p ${grpc_port}:${grpc_port} \
             -p ${p2p_port}:${p2p_port} \
             -p ${metrics_port}:${metrics_port} \
             -p ${pprof_port}:${pprof_port} \
             -p ${probe_port}:${probe_port} \
-            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+            -d kevin2025/mechain-storage-provider ${sp_bin_name} --config ./config.toml
       echo "succeed to start sp${index}"
     fi
     index=$(($index + 1))
