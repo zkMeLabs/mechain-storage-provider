@@ -193,24 +193,24 @@ function start_sp() {
     pprof_port=$((SP_START_PORT + 1000 * $index + 368))
     probe_port=$((SP_START_PORT + 1000 * $index + 369))
     if [ "$index" -eq 0 ]; then
-      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app \
             -p ${endpoint_port}:${endpoint_port} \
             -p ${grpc_port}:${grpc_port} \
             -p 9633:9633 \
             -p ${metrics_port}:${metrics_port} \
             -p ${pprof_port}:${pprof_port} \
             -p ${probe_port}:${probe_port} \
-            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+            -d kevin2025/mechain-storage-provider ${sp_bin_name} --config ./config.toml
       echo "succeed to start sp0!"
     else
-      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app/.mechain-spd \
+      docker run --name mechain-sp${index} -v /data/mechain-sp/devint/local_env/sp${index}:/app \
             -p ${endpoint_port}:${endpoint_port} \
             -p ${grpc_port}:${grpc_port} \
             -p ${p2p_port}:${p2p_port} \
             -p ${metrics_port}:${metrics_port} \
             -p ${pprof_port}:${pprof_port} \
             -p ${probe_port}:${probe_port} \
-            -d kevin2025/mechain-storage-provider ./${sp_bin_name} --config ./.mechain-spd/config.toml
+            -d kevin2025/mechain-storage-provider ${sp_bin_name} --config ./config.toml
       echo "succeed to start sp${index}"
     fi
     index=$(($index + 1))

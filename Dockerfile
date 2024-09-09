@@ -35,8 +35,8 @@ RUN echo "[ ! -z \"\$TERM\" -a -r /etc/motd ] && cat /etc/motd" >> /etc/bash/bas
 
 WORKDIR ${WORKDIR}
 
-COPY --from=builder /mechain-storage-provider/build/* ${WORKDIR}/
+COPY --from=builder /mechain-storage-provider/build/mechain-sp /usr/bin/mechain-sp
 RUN chown -R ${USER_UID}:${USER_GID} ${WORKDIR}
 USER ${USER_UID}:${USER_GID}
 
-CMD ["/app/mechain-sp"]
+CMD ["mechain-sp"]
