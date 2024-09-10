@@ -37,6 +37,7 @@ deployment/devnetup/local_env
 
 # dockerup
 deployment/dockerup/local_env
+deployment/dockerup/init_done
 
 sp.json
-deployment/dockerup/initdb_done
+

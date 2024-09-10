@@ -9,6 +9,8 @@ const composeTemplate = `
 services:
   mysql:
     image: {{.MySQLImage}}
+    networks:
+      - mechain-network
     container_name: sp-mysql
     volumes:
       - db-data:/var/lib/mysql
@@ -21,9 +23,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  initdb:
-    container_name: initdb
+  init:
+    container_name: init
     image: "{{$.Image}}"
+    networks:
+      - mechain-network    
     depends_on:
       mysql:
         condition: service_healthy
@@ -34,26 +38,28 @@ services:
     working_dir: "/workspace/deployment/dockerup"
     command: >
       bash -c "
-      rm -f initdb_done &&
+      rm -f init_done &&
       mkdir -p /workspace/build &&
       cp /usr/bin/mechain-sp /workspace/build/mechain-sp &&
       bash localup.sh --generate /workspace/sp.json root mechain mysql:3306 && 
       bash localup.sh --reset &&
-      touch initdb_done && 
+      touch init_done && 
       sleep infinity
       "
     healthcheck:
-      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/initdb_done && echo 'OK' || exit 1"]
+      test: ["CMD-SHELL", "test -f /workspace/deployment/dockerup/init_done && echo 'OK' || exit 1"]
       interval: 10s
       retries: 5
     restart: "on-failure"
 {{- range .Nodes }}
-  node{{.NodeIndex}}:
+  spnode-{{.NodeIndex}}:
     container_name: mechain-sp-{{.NodeIndex}}
     depends_on:
-      initdb:
+      init:
         condition: service_healthy
     image: "{{$.Image}}"
+    networks:
+      - mechain-network
     ports:
       - "{{.GRPCPort}}:{{$.BasePorts.GRPCPort}}"
       - "{{.P2PPort}}:{{$.BasePorts.P2PPort}}"
@@ -62,12 +68,16 @@ services:
       - "{{.ProbePort}}:{{$.BasePorts.ProbePort}}"
     volumes:
       - "local-env:/app"
+    working_dir: "/app/sp{{.NodeIndex}}/"
     command: >
-      /usr/bin/mechain-sp --config /app/sp{{.NodeIndex}}/config.toml
+      ./mechain-sp{{.NodeIndex}} --config config.toml </dev/null >log.txt 2>&1 &
 {{- end }}
 volumes:
   db-data:
   local-env:
+networks:
+  mechain-network:
+    external: true
 `
 
 type basePorts struct {
