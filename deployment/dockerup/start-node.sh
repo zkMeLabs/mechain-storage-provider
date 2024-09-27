@@ -4,6 +4,8 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 source "${SCRIPT_DIR}/env.info"
 
 MECHAIND_CMD=$(realpath "${SCRIPT_DIR}/../../../mechain/build/mechaind")
+TEMPLATE_FILE="$SCRIPT_DIR/reate_storage_provider.json"
+OUTPUT_FILE="$SCRIPT_DIR/proposal.json"
 
 SP_CMD="mechain-sp"
 
@@ -36,14 +38,18 @@ function generate() {
     bls_pub_key=("$($MECHAIND_CMD keys show sp_bls --keyring-backend test --home "$home" --output json | jq -r .pubkey_hex)")
     bls_priv_key=("$(echo "y" | $MECHAIND_CMD keys export sp_bls --unarmored-hex --unsafe --keyring-backend test --home "$home")")
 
-    echo "generated validator proposal file..."
+    echo "generated sp.info..."
 
     echo "OPERATOR_ADDRESS=\"${op_address}\"" >>"$SP_INFO"
     echo "OPERATOR_PRIVATE_KEY=\"${operator_priv_key}\"" >>"$SP_INFO"
     echo "FUNDING_PRIVATE_KEY=\"${fund_priv_key}\"" >>"$SP_INFO"
     echo "SEAL_PRIVATE_KEY=\"${seal_priv_key}\"" >>"$SP_INFO"
+    echo "SEAL_ADDRESS=\"${seal_addr}\"" >>"$SP_INFO"
     echo "APPROVAL_PRIVATE_KEY=\"${approval_priv_key}\"" >>"$SP_INFO"
+    echo "APPROVAL_ADDRESS=\"${approval_addr}\"" >>"$SP_INFO"
     echo "GC_PRIVATE_KEY=\"${gc_priv_key}\"" >>"$SP_INFO"
+    echo "GC_ADDRESS=\"${gc_addr}\"" >>"$SP_INFO"
+    echo "MAINTENANCE_ADDRESS=\"${maintenance_addr}\"" >>"$SP_INFO"
     echo "BLS_PRIVATE_KEY=\"${bls_priv_key}\"" >>"$SP_INFO"
 
     if [ $? -eq 0 ]; then
@@ -139,6 +145,29 @@ function make_config() {
     sed -i -e "s/FeeAmount = 0/FeeAmount = 12000000/g" "$home/config.toml"
 
     echo "succeed to generate $home/config.toml in ""${home}"
+}
+
+function make_proposal() {
+    echo "make config.toml..."
+    home=$1
+    SP_INFO="$home/sp.info"
+    source "$SP_INFO"
+    echo "generated validator proposal file..."
+    sed -e "s|\${moniker}|$MONIKER_NAME|g" \
+        -e "s|\${identity}|$MONIKER_NAME|g" \
+        -e "s|\${website}|http://$MONIKER_NAME|g" \
+        -e "s|\${security_contract}||g" \
+        -e "s|\${operator_address}|$VALIDATOR_BLS|g" \
+        -e "s|\${funding_address}|$OPERATOR_ADDRESS|g" \
+        -e "s|\${seal_address}|$SEAL_ADDRESS|g" \
+        -e "s|\${approval_address}|$APPROVAL_ADDRESS|g" \
+        -e "s|\${gc_address}|$GC_ADDRESS|g" \
+        -e "s|\${maintenance_address}|$CHALLENGER_ADDR|g" \
+        -e "s|\${your_endpoint}|$CHALLENGER_ADDR|g" \
+        -e "s|\${bls_pub_key}|$CHALLENGER_ADDR|g" \
+        -e "s|\${bls_proof}|$CHALLENGER_ADDR|g" \
+        "$TEMPLATE_FILE" >"$OUTPUT_FILE"
+
 }
 
 function start() {
