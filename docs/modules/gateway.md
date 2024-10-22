@@ -41,11 +41,11 @@ SP Gateway uses middleware to collect metrics, logging, register metadata and so
 
 We implement the Universal Endpoint according to [Mechain Whitepaper Universal Endpoint](https://github.com/zkMeLabs/mechain-whitepaper/blob/main/part3.md#231-universal-endpoint).
 
-All objects can be identified and accessed via a universal path: gnfd://<bucket_name><object_name>?[parameter]*
+All objects can be identified and accessed via a universal path: mechain://<bucket_name><object_name>?[parameter]*
 
 Explanation:
 
-- The beginning identifier `gnfd://` is mandatory and cannot be changed..
+- The beginning identifier `mechain://` is mandatory and cannot be changed..
 - `bucket_name` is the bucket name of the object and is mandatory.
 - `object_name` is the name of the object and is mandatory.
 - The parameter is an optional list of key-value pairs that provide additional information for the URI.
@@ -87,7 +87,8 @@ Public files can be downloaded/viewed with the following points to notice:
 
 #### Private File Access
 
-Accessing private file via Universal Endpoints is available now. 
+Accessing private file via Universal Endpoints is available now.
+
 1. Just browse an universal endpoint URL link, which points to a private file that you have access to read.
 2. Click the "connect wallet" button in the page
 

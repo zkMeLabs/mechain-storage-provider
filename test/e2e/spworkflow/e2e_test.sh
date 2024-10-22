@@ -126,8 +126,8 @@ function test_create_bucket() {
   cd "${workspace}"/mechain-cmd/build/
   ./mechain-cmd -c ./config.toml --home ./ sp ls
   sleep 5
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create gnfd://${BUCKET_NAME}
-  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create mechain://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ bucket head mechain://${BUCKET_NAME}
   sleep 10
 }
 
@@ -137,9 +137,9 @@ function test_create_bucket() {
 function test_file_size_less_than_16_mb() {
   set -e
   cd "${workspace}"/mechain-cmd/build/
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json mechain://${BUCKET_NAME}
   sleep 32
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/example.json ./test_data.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://${BUCKET_NAME}/example.json ./test_data.json
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./test_data.json
   cat test_data.json
 }
@@ -151,9 +151,9 @@ function test_file_size_greater_than_16_mb() {
   set -e
   cd "${workspace}"/mechain-cmd/build/
   dd if=/dev/urandom of=./random_file bs=17M count=1
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://${BUCKET_NAME}/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file mechain://${BUCKET_NAME}/random_file
   sleep 32
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/random_file ./new_random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://${BUCKET_NAME}/random_file ./new_random_file
   sleep 10
   check_md5 ./random_file ./new_random_file
 }
@@ -170,15 +170,15 @@ function test_sp_exit() {
   cd "${workspace}"/mechain-cmd/build/
   ls
   dd if=/dev/urandom of=./random_file bs=17M count=1
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create --primarySP "${operator_address}" gnfd://spexit
-  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://spexit/random_file
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create --primarySP "${operator_address}" mechain://spexit
+  ./mechain-cmd -c ./config.toml --home ./ bucket head mechain://spexit
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file mechain://spexit/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json mechain://spexit/example.json
   sleep 16
-  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/random_file
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file
-  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new.json
+  ./mechain-cmd -c ./config.toml --home ./ object head mechain://spexit/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://spexit/random_file ./new_random_file
+  ./mechain-cmd -c ./config.toml --home ./ object head mechain://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://spexit/example.json ./new.json
 
   sleep 10
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./new.json
@@ -191,10 +191,10 @@ function test_sp_exit() {
   ./mechain-cmd -c ./config.toml --home ./ sp ls
   sleep 180
   ./mechain-cmd -c ./config.toml --home ./ sp ls
-  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
-  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new1.json
-  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file1
+  ./mechain-cmd -c ./config.toml --home ./ bucket head mechain://spexit
+  ./mechain-cmd -c ./config.toml --home ./ object head mechain://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://spexit/example.json ./new1.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get mechain://spexit/random_file ./new_random_file1
   sleep 10
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./new1.json
   check_md5 ./random_file ./new_random_file1

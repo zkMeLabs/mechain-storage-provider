@@ -938,7 +938,7 @@ func (g *GateModular) getObjectByUniversalEndpointHandler(w http.ResponseWriter,
 			// check permission
 
 			// 1. solve the account
-			signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "gnfd://"+getBucketInfoRes.GetBucketInfo().BucketName+"/"+getObjectInfoRes.GetObjectInfo().GetObjectName(), expiry)
+			signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "mechain://"+getBucketInfoRes.GetBucketInfo().BucketName+"/"+getObjectInfoRes.GetObjectInfo().GetObjectName(), expiry)
 			accAddress, verifySigErr := VerifyPersonalSignature(signedMsg, signature)
 			if verifySigErr != nil {
 				log.CtxErrorw(reqCtx.Context(), "failed to verify signature", "error", verifySigErr)

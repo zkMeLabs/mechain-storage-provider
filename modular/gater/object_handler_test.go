@@ -2455,7 +2455,7 @@ func TestGateModular_getObjectByUniversalEndpointHandler(t *testing.T) {
 				privateKey, _ := crypto.GenerateKey()
 				address := crypto.PubkeyToAddress(privateKey.PublicKey)
 				log.Infof("address is: " + address.Hex())
-				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "gnfd://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
+				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "mechain://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
 				unSignedContentHash := accounts.TextHash([]byte(signedMsg)) // personal sign.
 				// sign data.
 				sig, _ := crypto.Sign(unSignedContentHash, privateKey)
@@ -2515,7 +2515,7 @@ func TestGateModular_getObjectByUniversalEndpointHandler(t *testing.T) {
 				privateKey, _ := crypto.GenerateKey()
 				address := crypto.PubkeyToAddress(privateKey.PublicKey)
 				log.Infof("address is: " + address.Hex())
-				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "gnfd://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
+				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "mechain://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
 				unSignedContentHash := accounts.TextHash([]byte(signedMsg)) // personal sign.
 				// sign data.
 				sig, _ := crypto.Sign(unSignedContentHash, privateKey)
@@ -2715,7 +2715,7 @@ func TestGateModular_getObjectByUniversalEndpointHandler(t *testing.T) {
 				privateKey, _ := crypto.GenerateKey()
 				address := crypto.PubkeyToAddress(privateKey.PublicKey)
 				log.Infof("address is: " + address.Hex())
-				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "gnfd://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
+				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "mechain://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
 				unSignedContentHash := accounts.TextHash([]byte(signedMsg)) // personal sign.
 				// sign data.
 				sig, _ := crypto.Sign(unSignedContentHash, privateKey)
@@ -2786,7 +2786,7 @@ func TestGateModular_getObjectByUniversalEndpointHandler(t *testing.T) {
 				privateKey, _ := crypto.GenerateKey()
 				address := crypto.PubkeyToAddress(privateKey.PublicKey)
 				log.Infof("address is: " + address.Hex())
-				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "gnfd://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
+				signedMsg := fmt.Sprintf(GnfdBuiltInDappSignedContentTemplate, "mechain://"+mockBucketName+"/"+mockObjectName, validExpiryDateStr)
 				unSignedContentHash := accounts.TextHash([]byte(signedMsg)) // personal sign.
 				// sign data.
 				sig, _ := crypto.Sign(unSignedContentHash, privateKey)
