@@ -49,9 +49,9 @@ function mechain_chain() {
 function transfer_account() {
   set -e
   cd "${workspace}"/mechain/
-  ./build/bin/gnfd tx bank send validator0 "${TEST_ACCOUNT_ADDRESS}" 500000000000000000000azkme --home "${workspace}"/mechain/deployment/localup/.local/validator0 --keyring-backend test --node http://localhost:26750 -y
+  ./build/mechaind tx bank send validator0 "${TEST_ACCOUNT_ADDRESS}" 500000000000000000000azkme --home "${workspace}"/mechain/deployment/localup/.local/validator0 --keyring-backend test --node http://localhost:26657 -y
   sleep 2
-  ./build/bin/gnfd q bank balances "${TEST_ACCOUNT_ADDRESS}" --node http://localhost:26750
+  ./build/mechaind q bank balances "${TEST_ACCOUNT_ADDRESS}" --node http://localhost:26657
 }
 
 #################################
@@ -66,14 +66,14 @@ function mechain_sp() {
   bash ./deployment/localup/localup.sh --reset
   bash ./deployment/localup/localup.sh --start
   sleep 60
-  ./deployment/localup/local_env/sp0/gnfd-sp0 update.quota --quota 5000000000 -c deployment/localup/local_env/sp0/config.toml
-  ./deployment/localup/local_env/sp1/gnfd-sp1 update.quota --quota 5000000000 -c deployment/localup/local_env/sp1/config.toml
-  ./deployment/localup/local_env/sp2/gnfd-sp2 update.quota --quota 5000000000 -c deployment/localup/local_env/sp2/config.toml
-  ./deployment/localup/local_env/sp3/gnfd-sp3 update.quota --quota 5000000000 -c deployment/localup/local_env/sp3/config.toml
-  ./deployment/localup/local_env/sp4/gnfd-sp4 update.quota --quota 5000000000 -c deployment/localup/local_env/sp4/config.toml
-  ./deployment/localup/local_env/sp5/gnfd-sp5 update.quota --quota 5000000000 -c deployment/localup/local_env/sp5/config.toml
-  ./deployment/localup/local_env/sp6/gnfd-sp6 update.quota --quota 5000000000 -c deployment/localup/local_env/sp6/config.toml
-  ./deployment/localup/local_env/sp7/gnfd-sp7 update.quota --quota 5000000000 -c deployment/localup/local_env/sp7/config.toml
+  ./deployment/localup/local_env/sp0/mechain-sp0 update.quota --quota 5000000000 -c deployment/localup/local_env/sp0/config.toml
+  ./deployment/localup/local_env/sp1/mechain-sp1 update.quota --quota 5000000000 -c deployment/localup/local_env/sp1/config.toml
+  ./deployment/localup/local_env/sp2/mechain-sp2 update.quota --quota 5000000000 -c deployment/localup/local_env/sp2/config.toml
+  ./deployment/localup/local_env/sp3/mechain-sp3 update.quota --quota 5000000000 -c deployment/localup/local_env/sp3/config.toml
+  ./deployment/localup/local_env/sp4/mechain-sp4 update.quota --quota 5000000000 -c deployment/localup/local_env/sp4/config.toml
+  ./deployment/localup/local_env/sp5/mechain-sp5 update.quota --quota 5000000000 -c deployment/localup/local_env/sp5/config.toml
+  ./deployment/localup/local_env/sp6/mechain-sp6 update.quota --quota 5000000000 -c deployment/localup/local_env/sp6/config.toml
+  ./deployment/localup/local_env/sp7/mechain-sp7 update.quota --quota 5000000000 -c deployment/localup/local_env/sp7/config.toml
   tail -n 1000 deployment/localup/local_env/sp0/mechain-sp.log
   ps -ef | grep mechain-sp | wc -l
 }
@@ -96,12 +96,12 @@ function build_cmd() {
   echo "${TEST_ACCOUNT_PRIVATE_KEY}" >key.txt
   touch password.txt &
   echo "test_sp_function" >password.txt
-  ./gnfd-cmd --home ./ --passwordfile password.txt account import key.txt
+  ./mechain-cmd --home ./ --passwordfile password.txt account import key.txt
 
   # construct config.toml
   touch config.toml
   {
-    echo rpcAddr = \"http://localhost:26750\"
+    echo rpcAddr = \"http://localhost:26657\"
     echo chainId = \"mechain_5151-1\"
   } >config.toml
 }
@@ -124,10 +124,10 @@ function build_mechain-go-sdk() {
 function test_create_bucket() {
   set -e
   cd "${workspace}"/mechain-cmd/build/
-  ./gnfd-cmd -c ./config.toml --home ./ sp ls
+  ./mechain-cmd -c ./config.toml --home ./ sp ls
   sleep 5
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create gnfd://${BUCKET_NAME}
-  ./gnfd-cmd -c ./config.toml --home ./ bucket head gnfd://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create gnfd://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://${BUCKET_NAME}
   sleep 10
 }
 
@@ -137,9 +137,9 @@ function test_create_bucket() {
 function test_file_size_less_than_16_mb() {
   set -e
   cd "${workspace}"/mechain-cmd/build/
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://${BUCKET_NAME}
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://${BUCKET_NAME}
   sleep 32
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/example.json ./test_data.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/example.json ./test_data.json
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./test_data.json
   cat test_data.json
 }
@@ -151,9 +151,9 @@ function test_file_size_greater_than_16_mb() {
   set -e
   cd "${workspace}"/mechain-cmd/build/
   dd if=/dev/urandom of=./random_file bs=17M count=1
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://${BUCKET_NAME}/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://${BUCKET_NAME}/random_file
   sleep 32
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/random_file ./new_random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://${BUCKET_NAME}/random_file ./new_random_file
   sleep 10
   check_md5 ./random_file ./new_random_file
 }
@@ -170,15 +170,15 @@ function test_sp_exit() {
   cd "${workspace}"/mechain-cmd/build/
   ls
   dd if=/dev/urandom of=./random_file bs=17M count=1
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create --primarySP "${operator_address}" gnfd://spexit
-  ./gnfd-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://spexit/random_file
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt bucket create --primarySP "${operator_address}" gnfd://spexit
+  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/octet-stream" ./random_file gnfd://spexit/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object put --contentType "application/json" "${workspace}"/test/e2e/spworkflow/testdata/example.json gnfd://spexit/example.json
   sleep 16
-  ./gnfd-cmd -c ./config.toml --home ./ object head gnfd://spexit/random_file
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file
-  ./gnfd-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new.json
+  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/random_file
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file
+  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new.json
 
   sleep 10
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./new.json
@@ -186,15 +186,15 @@ function test_sp_exit() {
 
   # start exiting sp5
   cd "${workspace}"/deployment/localup/local_env/sp5
-  ./gnfd-sp5 -c ./config.toml sp.exit -operatorAddress "${operator_address}"
+  ./mechain-sp5 -c ./config.toml sp.exit -operatorAddress "${operator_address}"
   cd "${workspace}"/mechain-cmd/build/
-  ./gnfd-cmd -c ./config.toml --home ./ sp ls
+  ./mechain-cmd -c ./config.toml --home ./ sp ls
   sleep 180
-  ./gnfd-cmd -c ./config.toml --home ./ sp ls
-  ./gnfd-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
-  ./gnfd-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new1.json
-  ./gnfd-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file1
+  ./mechain-cmd -c ./config.toml --home ./ sp ls
+  ./mechain-cmd -c ./config.toml --home ./ bucket head gnfd://spexit
+  ./mechain-cmd -c ./config.toml --home ./ object head gnfd://spexit/example.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/example.json ./new1.json
+  ./mechain-cmd -c ./config.toml --home ./ --passwordfile password.txt object get gnfd://spexit/random_file ./new_random_file1
   sleep 10
   check_md5 "${workspace}"/test/e2e/spworkflow/testdata/example.json ./new1.json
   check_md5 ./random_file ./new_random_file1
