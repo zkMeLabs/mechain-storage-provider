@@ -35,4 +35,4 @@ jobs:
         env:
           KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
         with:
-          args: -n mechain-test wait --for=condition=Available statefulset/mechain-storage-provider --timeout=600s
+          args: -n mechain-test rollout status statefulset mechain-storage-provider --timeout=600s
