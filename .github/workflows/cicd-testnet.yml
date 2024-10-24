@@ -1,5 +1,5 @@
 # For release
-name: Deploy for testnet
+name: Release for testnet
 on:
   push:
     tags:
@@ -17,6 +17,6 @@ jobs:
     uses: './.github/workflows/docker-publish.yml'
     secrets: inherit
     with:
-      tags: zkmelabs/mechain-storage-provider:test
+      tags: zkmelabs/mechain-storage-provider:latest
       publish_tag: true
 
