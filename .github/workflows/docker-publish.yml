@@ -7,11 +7,6 @@ on:
         description: Image tags, example. zkmelabs/mechain-storage-provider:develop
         required: true
         type: string
-      platforms:
-        description: Image platforms (you can specify multiple platforms separated by comma)
-        required: false
-        type: string
-        default: linux/amd64
 
 jobs:
   docker:
@@ -45,7 +40,6 @@ jobs:
         with:
           context: .
           push: true
-          platforms: ${{ inputs.platforms }}
           tags: ${{ inputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
