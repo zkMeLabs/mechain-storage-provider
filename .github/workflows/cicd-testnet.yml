@@ -1,0 +1,22 @@
+# For release
+name: Deploy for testnet
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  publish_image:
+
+    name: Publish Docker image
+    uses: './.github/workflows/docker-publish.yml'
+    secrets: inherit
+    with:
+      tags: zkmelabs/mechain-storage-provider:test
+      publish_tag: true
+

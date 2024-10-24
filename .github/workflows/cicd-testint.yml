@@ -1,5 +1,5 @@
 # For developer
-name: Deploy for devint
+name: Deploy for testint
 on:
   push:
     branches:
