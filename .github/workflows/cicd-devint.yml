@@ -1,0 +1,39 @@
+# For developer
+name: Deploy for devint
+on:
+  push:
+    branches:
+      - develop
+      - kevin/cicd
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  publish_image:
+    name: Publish Docker image
+    uses: './.github/workflows/docker-publish.yml'
+    secrets: inherit
+    with:
+      tags: zkmelabs/mechain-storage-provider:develop
+
+
+  deploy_with_k8s:
+    runs-on: ubuntu-latest
+    needs: publish_image
+    steps:
+      - name: "Deploy new StatefulSet"
+        uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
+        with:
+          args: -n mechain-dev rollout restart statefulset mechain-storage-provider
+
+      - name: "Check StatefulSet"
+        uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
+        with:
+          args: -n mechain-dev rollout status statefulset mechain-storage-provider --timeout=600s
