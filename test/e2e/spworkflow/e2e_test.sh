@@ -6,7 +6,7 @@ export CGO_CFLAGS_ALLOW="-O -D__BLST_PORTABLE__"
 workspace=${GITHUB_WORKSPACE}
 
 # some constants
-MECHAIN_TAG="master"
+MECHAIN_TAG="main"
 # mechain cmd tag name: v0.1.0
 MECHAIN_CMD_TAG="feat-adapt-tags"
 # mechain go sdk tag name: v1.0.0
@@ -296,4 +296,4 @@ function main() {
   esac
 }
 
-main $@
+main "$@"

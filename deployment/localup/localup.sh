@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+SP_NUM=8
 
 basedir=$(
   cd $(dirname $0)
