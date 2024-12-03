@@ -48,6 +48,7 @@ var _ consensus.Consensus = &Gnfd{}
 type GnfdChainConfig struct {
 	ChainID      string
 	ChainAddress []string
+	RpcAddress   []string
 }
 
 type Gnfd struct {
@@ -68,7 +69,7 @@ func NewGnfd(cfg *GnfdChainConfig) (*Gnfd, error) {
 	var clients []*MechainClient
 	var wsClients []*chttp.HTTP
 	for _, address := range cfg.ChainAddress {
-		cc, err := chainClient.NewCustomMechainClient(address, cfg.ChainID, jsonclient.DefaultHTTPClient)
+		cc, err := chainClient.NewCustomMechainClient(address, cfg.RpcAddress[0], cfg.ChainID, jsonclient.DefaultHTTPClient)
 		if err != nil {
 			return nil, err
 		}

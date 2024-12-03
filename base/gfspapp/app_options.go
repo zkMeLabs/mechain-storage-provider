@@ -512,6 +512,7 @@ func DefaultGfSpConsensusOption(app *GfSpBaseApp, cfg *gfspconfig.GfSpConfig) er
 	gnfdCfg := &gnfd.GnfdChainConfig{
 		ChainID:      cfg.Chain.ChainID,
 		ChainAddress: cfg.Chain.ChainAddress,
+		RpcAddress:   cfg.Chain.RpcAddress,
 	}
 	chain, err := gnfd.NewGnfd(gnfdCfg)
 	if err != nil {

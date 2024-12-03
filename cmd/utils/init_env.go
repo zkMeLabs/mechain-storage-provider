@@ -149,6 +149,7 @@ func MakeGnfd(cfg *gfspconfig.GfSpConfig) (*gnfd.Gnfd, error) {
 	gnfdCfg := &gnfd.GnfdChainConfig{
 		ChainID:      cfg.Chain.ChainID,
 		ChainAddress: cfg.Chain.ChainAddress,
+		RpcAddress:   cfg.Chain.RpcAddress,
 	}
 	return gnfd.NewGnfd(gnfdCfg)
 }

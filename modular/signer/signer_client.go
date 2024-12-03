@@ -114,7 +114,7 @@ func NewMechainChainSignClient(rpcAddr, evmRpcAddr, chainID string, gasInfo map[
 		return nil, err
 	}
 
-	operatorClient, err := client.NewMechainClient(rpcAddr, chainID, client.WithKeyManager(operatorKM))
+	operatorClient, err := client.NewMechainClient(rpcAddr, evmRpcAddr, chainID, client.WithKeyManager(operatorKM))
 	if err != nil {
 		log.Errorw("failed to new operator mechain client", "error", err)
 		return nil, err
@@ -136,7 +136,7 @@ func NewMechainChainSignClient(rpcAddr, evmRpcAddr, chainID string, gasInfo map[
 		log.Errorw("failed to new seal private key manager", "error", err)
 		return nil, err
 	}
-	sealClient, err := client.NewMechainClient(rpcAddr, chainID, client.WithKeyManager(sealKM))
+	sealClient, err := client.NewMechainClient(rpcAddr, evmRpcAddr, chainID, client.WithKeyManager(sealKM))
 	if err != nil {
 		log.Errorw("failed to new seal mechain client", "error", err)
 		return nil, err
@@ -152,7 +152,7 @@ func NewMechainChainSignClient(rpcAddr, evmRpcAddr, chainID string, gasInfo map[
 		log.Errorw("failed to new approval private key manager", "error", err)
 		return nil, err
 	}
-	approvalClient, err := client.NewMechainClient(rpcAddr, chainID, client.WithKeyManager(approvalKM))
+	approvalClient, err := client.NewMechainClient(rpcAddr, evmRpcAddr, chainID, client.WithKeyManager(approvalKM))
 	if err != nil {
 		log.Errorw("failed to new approval mechain client", "error", err)
 		return nil, err
@@ -163,7 +163,7 @@ func NewMechainChainSignClient(rpcAddr, evmRpcAddr, chainID string, gasInfo map[
 		log.Errorw("failed to new gc private key manager", "error", err)
 		return nil, err
 	}
-	gcClient, err := client.NewMechainClient(rpcAddr, chainID, client.WithKeyManager(gcKM))
+	gcClient, err := client.NewMechainClient(rpcAddr, evmRpcAddr, chainID, client.WithKeyManager(gcKM))
 	if err != nil {
 		log.Errorw("failed to new gc mechain client", "error", err)
 		return nil, err
