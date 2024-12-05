@@ -312,6 +312,8 @@ type Signer interface {
 	SealObjectEvm(ctx context.Context, object *storagetypes.MsgSealObject) (string, error)
 	// SealObjectV2 signs the MsgSealObject and broadcast the tx to mechain.
 	SealObjectV2(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error)
+	// SealObjectV2Evm signs the MsgSealObject and broadcast the tx to mechain by evm tx.
+	SealObjectV2Evm(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error)
 	// RejectUnSealObject signs the MsgRejectSealObject and broadcast the tx to mechain.
 	RejectUnSealObject(ctx context.Context, object *storagetypes.MsgRejectSealObject) (string, error)
 	// RejectUnSealObjectEvm signs the MsgRejectSealObject and broadcast the tx to mechain by evm tx.

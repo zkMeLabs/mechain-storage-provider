@@ -360,7 +360,7 @@ func (g *GfSpBaseApp) GfSpSign(ctx context.Context, req *gfspserver.GfSpSignRequ
 			metrics.ReqTime.WithLabelValues(SignerFailureDelegateUpdateObjectContent).Observe(time.Since(startTime).Seconds())
 		}
 	case *gfspserver.GfSpSignRequest_SealObjectInfoV2:
-		txHash, err = g.signer.SealObjectV2(ctx, t.SealObjectInfoV2)
+		txHash, err = g.signer.SealObjectV2Evm(ctx, t.SealObjectInfoV2)
 		if err != nil {
 			log.CtxErrorw(ctx, "failed to seal object", "error", err)
 			metrics.ReqCounter.WithLabelValues(SignerFailureSealObject).Inc()

@@ -339,3 +339,7 @@ func (s *SignModular) DelegateCreateObjectEvm(ctx context.Context, msg *storaget
 func (s *SignModular) SealObjectV2(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error) {
 	return s.client.SealObjectV2(ctx, SignSeal, object)
 }
+
+func (s *SignModular) SealObjectV2Evm(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error) {
+	return s.client.SealObjectV2Evm(ctx, SignSeal, object)
+}
