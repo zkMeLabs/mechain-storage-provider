@@ -2770,3 +2770,92 @@ func (client *MechainChainSignClient) SealObjectV2(ctx context.Context, scope Si
 	ErrSealObjectOnChain.SetError(fmt.Errorf("failed to broadcast seal object tx, error: %v", err))
 	return "", ErrSealObjectOnChain
 }
+
+func (client *MechainChainSignClient) SealObjectV2Evm(ctx context.Context, scope SignType,
+	sealObject *storagetypes.MsgSealObjectV2,
+) (string, error) {
+	if sealObject == nil {
+		log.CtxError(ctx, "failed to seal object due to pointer dangling")
+		return "", ErrDanglingPointer
+	}
+	ctx = log.WithValue(ctx, log.CtxKeyBucketName, sealObject.GetBucketName())
+	ctx = log.WithValue(ctx, log.CtxKeyObjectName, sealObject.GetObjectName())
+	km, err := client.mechainClients[scope].GetKeyManager()
+	if err != nil {
+		log.CtxErrorw(ctx, "failed to get private key", "error", err)
+		return "", ErrSignMsg
+	}
+	cosmosChainId, err := client.mechainClients[scope].GetChainID()
+	if err != nil {
+		return "", err
+	}
+
+	chainId, err := types.ParseChainID(cosmosChainId)
+	if err != nil {
+		return "", err
+	}
+
+	client.sealLock.Lock()
+	defer client.sealLock.Unlock()
+
+	msgSealObject := storagetypes.NewMsgSealObjectV2(km.GetAddr(),
+		sealObject.GetBucketName(), sealObject.GetObjectName(), sealObject.GetGlobalVirtualGroupId(),
+		sealObject.GetSecondarySpBlsAggSignatures(), sealObject.GetExpectChecksums())
+
+	var (
+		txHash   string
+		nonce    uint64
+		nonceErr error
+	)
+	for i := 0; i < BroadcastTxRetry; i++ {
+		nonce = client.sealAccNonce
+		txOpts, err := CreateTxOpts(ctx, client.evmClient, client.privateKeys[SignSeal], chainId, client.gasInfo[Seal].GasLimit, nonce)
+		if err != nil {
+			log.CtxErrorw(ctx, "failed to create tx opts", "error", err)
+			return "", err
+		}
+
+		session, err := CreateStorageSession(client.evmClient, *txOpts, types.StorageAddress)
+		if err != nil {
+			log.CtxErrorw(ctx, "failed to create session", "error", err)
+			return "", err
+		}
+		expectChecksums := make([]string, 0)
+		for _, checksum := range msgSealObject.ExpectChecksums {
+			checksumStr := base64.StdEncoding.EncodeToString(checksum)
+			expectChecksums = append(expectChecksums, checksumStr)
+		}
+
+		txRsp, err := session.SealObjectV2(
+			ethcmn.BytesToAddress(km.GetAddr().Bytes()),
+			sealObject.GetBucketName(),
+			sealObject.GetObjectName(),
+			sealObject.GetGlobalVirtualGroupId(),
+			base64.StdEncoding.EncodeToString(sealObject.GetSecondarySpBlsAggSignatures()),
+			expectChecksums,
+		)
+
+		if err != nil {
+			if strings.Contains(err.Error(), "invalid nonce") {
+				// if nonce mismatch, wait for next block, reset nonce by querying the nonce on chain
+				nonce, nonceErr = client.getNonceOnChain(ctx, client.mechainClients[scope])
+				if nonceErr != nil {
+					log.CtxErrorw(ctx, "failed to get seal account nonce", "error", nonceErr)
+					ErrSealObjectOnChain.SetError(fmt.Errorf("failed to get seal account nonce, error: %v", nonceErr))
+					return "", ErrSealObjectOnChain
+				}
+				client.sealAccNonce = nonce
+			}
+
+			log.CtxErrorw(ctx, "failed to broadcast seal object tx", "retry_number", i, "error", err)
+			continue
+		}
+		client.sealAccNonce = nonce + 1
+		log.CtxDebugw(ctx, "succeed to broadcast seal object tx", "tx_hash", txHash, "seal_msg", msgSealObject)
+		return txRsp.Hash().String(), nil
+	}
+
+	// failed to broadcast tx
+	ErrSealObjectOnChain.SetError(fmt.Errorf("failed to broadcast seal object tx, error: %v", err))
+	return "", ErrSealObjectOnChain
+}

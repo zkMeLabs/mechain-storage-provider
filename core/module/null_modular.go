@@ -527,3 +527,7 @@ func (m *NilModular) DelegateUpdateObjectContentEvm(ctx context.Context, msg *st
 func (m *NilModular) SealObjectV2(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error) {
 	return "", nil
 }
+
+func (m *NilModular) SealObjectV2Evm(ctx context.Context, object *storagetypes.MsgSealObjectV2) (string, error) {
+	return "", nil
+}
