@@ -93,6 +93,7 @@ type NodeConfig struct {
 }
 
 type ComposeConfig struct {
+	NodeSize        int
 	Nodes           []NodeConfig
 	Image           string
 	MySQLImage      string
@@ -101,35 +102,32 @@ type ComposeConfig struct {
 }
 
 func main() {
-	numNodes := 8
-
-	bp := basePorts{
-		GRPCPort: 9033,
-		P2PPort:  9063,
-	}
-	bp.MetricPort = bp.GRPCPort + 367
-	bp.PprofPort = bp.GRPCPort + 368
-	bp.ProbePort = bp.GRPCPort + 369
-
-	nodes := make([]NodeConfig, numNodes)
-	for i := 0; i < numNodes; i++ {
-		nodes[i] = NodeConfig{
-			NodeIndex: i,
-			basePorts: basePorts{
-				GRPCPort:   i + bp.GRPCPort,
-				P2PPort:    i + bp.P2PPort,
-				MetricPort: i*1000 + bp.MetricPort,
-				PprofPort:  i*1000 + bp.PprofPort,
-				ProbePort:  i*1000 + bp.ProbePort,
-			},
-		}
-	}
-	composeConfig := ComposeConfig{
-		Nodes:           nodes,
+	config := ComposeConfig{
+		NodeSize:        3,
 		Image:           "zkmelabs/mechain-storage-provider",
 		MySQLImage:      "mysql:8",
 		ProjectBasePath: ".",
-		BasePorts:       bp,
+		BasePorts: basePorts{
+			GRPCPort: 9033,
+			P2PPort:  9063,
+		},
+	}
+
+	config.BasePorts.MetricPort = config.BasePorts.GRPCPort + 367
+	config.BasePorts.PprofPort = config.BasePorts.GRPCPort + 368
+	config.BasePorts.ProbePort = config.BasePorts.GRPCPort + 369
+
+	for i := 0; i < config.NodeSize; i++ {
+		config.Nodes = append(config.Nodes, NodeConfig{
+			NodeIndex: i,
+			basePorts: basePorts{
+				GRPCPort:   i + config.BasePorts.GRPCPort,
+				P2PPort:    i + config.BasePorts.P2PPort,
+				MetricPort: i*1000 + config.BasePorts.MetricPort,
+				PprofPort:  i*1000 + config.BasePorts.PprofPort,
+				ProbePort:  i*1000 + config.BasePorts.ProbePort,
+			},
+		})
 	}
 
 	tpl, err := template.New("docker-compose").Parse(composeTemplate)
@@ -143,7 +141,7 @@ func main() {
 	}
 	defer file.Close()
 
-	err = tpl.Execute(file, composeConfig)
+	err = tpl.Execute(file, config)
 	if err != nil {
 		panic(err)
 	}

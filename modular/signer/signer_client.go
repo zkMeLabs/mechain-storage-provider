@@ -353,7 +353,6 @@ func (client *MechainChainSignClient) SealObjectEvm(ctx context.Context, scope S
 			sealObject.GetGlobalVirtualGroupId(),
 			base64.StdEncoding.EncodeToString(sealObject.GetSecondarySpBlsAggSignatures()),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatch, wait for next block, reset nonce by querying the nonce on chain
@@ -606,7 +605,6 @@ func (client *MechainChainSignClient) DiscontinueBucketEvm(ctx context.Context, 
 		discontinueBucket.GetBucketName(),
 		discontinueBucket.GetReason(),
 	)
-
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid nonce") {
 			// if nonce mismatch, wait for next block, reset nonce by querying the nonce on chain
@@ -746,7 +744,6 @@ func (client *MechainChainSignClient) CreateGlobalVirtualGroupEvm(ctx context.Co
 			gvg.GetSecondarySpIds(),
 			deposit,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -897,7 +894,6 @@ func (client *MechainChainSignClient) CompleteMigrateBucketEvm(ctx context.Conte
 			migrateBucket.GetGlobalVirtualGroupFamilyId(),
 			gvgMappings,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1029,7 +1025,6 @@ func (client *MechainChainSignClient) UpdateSPPriceEvm(ctx context.Context, scop
 		priceInfo.FreeReadQuota,
 		priceInfo.StorePrice.BigInt(),
 	)
-
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid nonce") {
 			// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1182,7 +1177,6 @@ func (client *MechainChainSignClient) SwapOutEvm(ctx context.Context, scope Sign
 			swapOut.GetSuccessorSpId(),
 			SuccessorSpApproval,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1320,7 +1314,6 @@ func (client *MechainChainSignClient) CompleteSwapOutEvm(ctx context.Context, sc
 			completeSwapOut.GetGlobalVirtualGroupFamilyId(),
 			completeSwapOut.GetGlobalVirtualGroupIds(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1452,7 +1445,6 @@ func (client *MechainChainSignClient) SPExitEvm(ctx context.Context, scope SignT
 		}
 
 		txRsp, err := session.SpExit()
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1582,7 +1574,6 @@ func (client *MechainChainSignClient) CompleteSPExitEvm(ctx context.Context, sco
 			completeSPExit.StorageProvider,
 			completeSPExit.Operator,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1711,7 +1702,6 @@ func (client *MechainChainSignClient) RejectMigrateBucketEvm(ctx context.Context
 		txRsp, err := session.RejectMigrateBucket(
 			msg.GetBucketName(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1846,7 +1836,6 @@ func (client *MechainChainSignClient) DepositEvm(ctx context.Context, scope Sign
 			msg.GlobalVirtualGroupId,
 			deposit,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -1976,7 +1965,6 @@ func (client *MechainChainSignClient) DeleteGlobalVirtualGroupEvm(ctx context.Co
 		txRsp, err := session.DeleteGlobalVirtualGroup(
 			msg.GetGlobalVirtualGroupId(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -2115,7 +2103,6 @@ func (client *MechainChainSignClient) DelegateCreateObjectEvm(ctx context.Contex
 			expectChecksums,
 			uint8(msg.RedundancyType),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -2252,7 +2239,6 @@ func (client *MechainChainSignClient) DelegateUpdateObjectContentEvm(ctx context
 			msg.ContentType,
 			expectChecksums,
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -2417,7 +2403,6 @@ func (client *MechainChainSignClient) ReserveSwapInEvm(ctx context.Context, scop
 			msg.GetGlobalVirtualGroupFamilyId(),
 			msg.GetGlobalVirtualGroupId(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -2548,7 +2533,6 @@ func (client *MechainChainSignClient) CompleteSwapInEvm(ctx context.Context, sco
 			msg.GetGlobalVirtualGroupFamilyId(),
 			msg.GetGlobalVirtualGroupId(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
@@ -2679,7 +2663,6 @@ func (client *MechainChainSignClient) CancelSwapInEvm(ctx context.Context, scope
 			msg.GetGlobalVirtualGroupFamilyId(),
 			msg.GetGlobalVirtualGroupId(),
 		)
-
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid nonce") {
 				// if nonce mismatches, waiting for next block, reset nonce by querying the nonce on chain
