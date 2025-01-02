@@ -325,7 +325,7 @@ replace (
 	// use Evmos geth fork
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc2
 	github.com/evmos/evmos-ledger-go => github.com/zkMeLabs/mechain-ledger-go v0.3.0-rc0-mocks-mechain.3
-	github.com/evmos/evmos/v12 => github.com/zkMeLabs/mechain/v12 v12.0.0-20241204074122-0be3ca312359
+	github.com/evmos/evmos/v12 => github.com/zkMeLabs/mechain/v12 v12.0.0-20250102093417-88ab76de176c
 	github.com/forbole/juno/v4 => github.com/zkMeLabs/mechain-juno/v4 v4.0.0-mechain.3
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/quic-go/quic-go => github.com/quic-go/quic-go v0.41.0
