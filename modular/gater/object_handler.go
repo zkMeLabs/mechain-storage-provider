@@ -22,6 +22,7 @@ import (
 	"github.com/zkMeLabs/mechain-storage-provider/base/types/gfsperrors"
 	"github.com/zkMeLabs/mechain-storage-provider/base/types/gfsptask"
 	coremodule "github.com/zkMeLabs/mechain-storage-provider/core/module"
+	coretask "github.com/zkMeLabs/mechain-storage-provider/core/task"
 	modelgateway "github.com/zkMeLabs/mechain-storage-provider/model/gateway"
 	"github.com/zkMeLabs/mechain-storage-provider/modular/downloader"
 	"github.com/zkMeLabs/mechain-storage-provider/modular/metadata"
@@ -539,6 +540,14 @@ func (g *GateModular) getObjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func segmentPieceCount(payloadSize uint64, maxSegmentSize uint64) uint32 {
+	count := payloadSize / maxSegmentSize
+	if payloadSize%maxSegmentSize > 0 {
+		count++
+	}
+	return uint32(count)
+}
+
 // downloadObject this is common method, which does the actual download action.
 // It is called by both getObjectHandler and getObjectByUniversalEndpointHandler after passing the authentication and authorization.
 func (g *GateModular) downloadObject(w http.ResponseWriter, reqCtx *RequestContext) error {
@@ -556,6 +565,8 @@ func (g *GateModular) downloadObject(w http.ResponseWriter, reqCtx *RequestConte
 		extraQuota, consumedQuota uint64
 		replyDataSize             int
 		dbUpdateTimeStamp         int64
+		triggerRecovery           bool
+		triggerRecoveryErr        error
 	)
 	defer func() {
 		if err != nil {
@@ -639,6 +650,9 @@ func (g *GateModular) downloadObject(w http.ResponseWriter, reqCtx *RequestConte
 	consumedQuota = 0
 	extraQuota = 0
 	downloadSize := uint64(highOffset - lowOffset + 1)
+	triggerRecovery = false
+	maxSegmentSize := params.GetMaxSegmentSize()
+	segmentCount := segmentPieceCount(objectInfo.PayloadSize, maxSegmentSize)
 	for idx, pInfo := range pieceInfos {
 		enableCheck := false
 		if idx == 0 { // only check in first piece
@@ -660,7 +674,31 @@ func (g *GateModular) downloadObject(w http.ResponseWriter, reqCtx *RequestConte
 			if idx >= 1 || (idx == 0 && downloaderErr.GetInnerCode() == 85101) {
 				extraQuota = downloadSize - consumedQuota
 			}
-			return err
+			// if piece data is unreadable, trigger data recover task
+			if downloaderErr.GetInnerCode() == 85101 {
+				segmentIdx, recoverErr := g.baseApp.PieceOp().ParseSegmentIdx(pInfo.SegmentPieceKey)
+				if recoverErr != nil {
+					log.CtxErrorw(reqCtx.Context(), "failed to recover piece", "error", recoverErr)
+					return err
+				}
+				if uint32(segmentIdx) > segmentCount {
+					return err
+				}
+
+				task := &gfsptask.GfSpRecoverPieceTask{}
+				task.InitRecoverPieceTask(objectInfo, params, coretask.DefaultLargerTaskPriority+1, uint32(segmentIdx), int32(-1), maxSegmentSize, 50, 1)
+				log.CtxWarnw(reqCtx.Context(), "init recover piece task, access the piece later", "task_info", task.Info())
+				g.baseApp.GfSpClient().ReportTask(reqCtx.Context(), task)
+				triggerRecovery = true
+				triggerRecoveryErr = err
+			}
+			//other error eg. request count exceed max count, just return
+			if !triggerRecovery {
+				return err
+			}
+		}
+		if triggerRecovery {
+			continue
 		}
 
 		writeTime := time.Now()
@@ -675,6 +713,9 @@ func (g *GateModular) downloadObject(w http.ResponseWriter, reqCtx *RequestConte
 		// the quota value should be computed by the reply content length
 		consumedQuota += uint64(replyDataSize)
 		metrics.PerfGetObjectTimeHistogram.WithLabelValues("get_object_write_time").Observe(time.Since(writeTime).Seconds())
+	}
+	if triggerRecovery {
+		return triggerRecoveryErr
 	}
 
 	metrics.ReqPieceSize.WithLabelValues(GatewayGetObjectSize).Observe(float64(highOffset - lowOffset + 1))
