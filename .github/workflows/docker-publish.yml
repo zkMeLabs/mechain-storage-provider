@@ -1,4 +1,4 @@
-name: publish to Docker Hub
+name: Publish to Docker Hub
 
 on:
   workflow_call:

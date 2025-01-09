@@ -11,6 +11,41 @@ concurrency:
 
 
 jobs:
+  notify_to_lark:
+    name: Notify to Lark
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      commit_logs: ${{ steps.commit_logs.outputs.commit_logs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Get Github version info"
+        id: version
+        run: |
+          echo "version=${{ github.ref_name }} (commit=`echo ${GITHUB_SHA} | cut -c1-8`)" >> "$GITHUB_OUTPUT"
+
+      - name: "Get commit logs"
+        id: commit_logs
+        run: |
+          commit_logs=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h(%an) - %s")
+          echo "commit_logs=$commit_logs" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: "Notify begin message to Lark"
+        uses: kevin-rd/lark-notify@v1.8
+        env:
+          LARK_WEBHOOK: ${{ secrets.LARK_WEBHOOK }}
+        with:
+          header_template: "blue"
+          header_content: ${{ github.repository }} 待部署通知
+          message_env_tag: "testint"
+          message_version: "${{ steps.version.outputs.version }}"
+          message_commit_logs: "${{ steps.commit_logs.outputs.commit_logs }}"
+
+
   publish_image:
     name: Publish Docker image
     uses: './.github/workflows/docker-publish.yml'
@@ -20,19 +55,12 @@ jobs:
 
 
   deploy-with-k8s:
-    runs-on: ubuntu-latest
+    name: Deploy to devint on k8s
+    uses: './.github/workflows/deploy-to-k8s.yml'
     needs: publish_image
-    steps:
-      - name: "Deploy new StatefulSet"
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
-        with:
-          args: -n mechain-test rollout restart statefulset mechain-storage-provider
-
-      - name: "Check StatefulSet"
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
-        with:
-          args: -n mechain-test rollout status statefulset mechain-storage-provider --timeout=600s
+    secrets: inherit
+    with:
+      namespace_k8s: mechain-test
+      release_name: mechain-storage-provider
+      version_info: ${{ needs.notify_to_lark.outputs.version }}
+      commit_info: ${{ needs.notify_to_lark.outputs.commit_logs }}
