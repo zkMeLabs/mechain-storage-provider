@@ -15,21 +15,21 @@ jobs:
     name: Notify to Lark
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      commit_logs: ${{ steps.commit_logs.outputs.commit_logs }}
+      version_info: ${{ steps.meta.outputs.version_info }}
+      commit_logs: ${{ steps.meta.outputs.commit_logs }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: "Get Github version info"
-        id: version
+        id: meta
         run: |
-          echo "version=${{ github.ref_name }} (commit=`echo ${GITHUB_SHA} | cut -c1-8`)" >> "$GITHUB_OUTPUT"
-
-      - name: "Get commit logs"
-        id: commit_logs
-        run: |
+          commit_id=`echo ${GITHUB_SHA} | cut -c1-8`
+          repository_url=${{ github.event.repository.html_url }}
+          version_info="[${{ github.ref_name }}](${repository_url}/tree/${{ github.ref_name }}) (commit=[${commit_id}](${repository_url}/commit/${{ github.sha }}))"
+          echo "version_info=version_info" >> $GITHUB_OUTPUT
+          
           commit_logs=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h(%an) - %s")
           echo "commit_logs=$commit_logs" >> $GITHUB_OUTPUT
         continue-on-error: true
@@ -42,8 +42,8 @@ jobs:
           header_template: "blue"
           header_content: ${{ github.repository }} 待部署通知
           message_env_tag: "testint"
-          message_version: "${{ steps.version.outputs.version }}"
-          message_commit_logs: "${{ steps.commit_logs.outputs.commit_logs }}"
+          message_version: "${{ steps.meta.outputs.version_info }}"
+          message_commit_logs: "${{ steps.meta.outputs.commit_logs }}"
 
 
   publish_image:
@@ -54,13 +54,15 @@ jobs:
       tags: zkmelabs/mechain-storage-provider:test
 
 
-  deploy-with-k8s:
-    name: Deploy to devint on k8s
+  deploy_with_k8s:
+    name: Deploy to testint on k8s
     uses: './.github/workflows/deploy-to-k8s.yml'
-    needs: publish_image
+    needs:
+      - notify_to_lark
+      - publish_image
     secrets: inherit
     with:
       namespace_k8s: mechain-test
       release_name: mechain-storage-provider
-      version_info: ${{ needs.notify_to_lark.outputs.version }}
-      commit_info: ${{ needs.notify_to_lark.outputs.commit_logs }}
+      version_info: "${{ needs.notify_to_lark.outputs.version_info }}"
+      commit_info: "${{ needs.notify_to_lark.outputs.commit_logs }}"

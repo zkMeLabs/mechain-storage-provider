@@ -16,7 +16,7 @@ jobs:
     name: Notify to Lark
     runs-on: ubuntu-latest
     outputs:
-      commit_id: ${{steps.meta.outputs.commit_id }}
+      version_info: ${{ steps.meta.outputs.version_info }}
       commit_logs: ${{ steps.meta.outputs.commit_logs }}
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,11 @@ jobs:
       - name: "Get Github version info"
         id: meta
         run: |
-          echo "commit_id=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_OUTPUT"
+          commit_id=`echo ${GITHUB_SHA} | cut -c1-8`
+          repository_url=${{ github.event.repository.html_url }}
+          version_info="[${{ github.ref_name }}](${repository_url}/tree/${{ github.ref_name }}) (commit=[${commit_id}](${repository_url}/commit/${{ github.sha }}))"
+          echo "version_info=version_info" >> $GITHUB_OUTPUT
+          
           commit_logs=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h(%an) - %s")
           echo "commit_logs=$commit_logs" >> $GITHUB_OUTPUT
         continue-on-error: true
@@ -39,7 +43,7 @@ jobs:
           header_template: "blue"
           header_content: ${{ github.repository }} 待部署通知
           message_env_tag: "devint"
-          message_version: "[${{ github.ref_name }}](${{ github.event.repository.html_url }}/tree/${{ github.head_ref }}) (commit=[${{ steps.meta.outputs.commit_id }}](${{ github.event.repository.html_url }}/commit/${{ github.sha }}))"
+          message_version: "${{ steps.meta.outputs.version_info }}"
           message_commit_logs: "${{ steps.meta.outputs.commit_logs }}"
 
 
@@ -61,5 +65,5 @@ jobs:
     with:
       namespace_k8s: mechain-dev
       release_name: mechain-storage-provider
-      version_info: "[${{ github.ref_name }}](${{ github.event.repository.html_url }}/tree/${{ github.head_ref }}) (commit=[${{ needs.notify_to_lark.outputs.commit_id }}](${{ github.event.repository.html_url }}/commit/${{ github.sha }}))"
-      commit_info: ${{ needs.notify_to_lark.outputs.commit_logs }}
+      version_info: "${{ needs.notify_to_lark.outputs.version_info }}"
+      commit_info: "${{ needs.notify_to_lark.outputs.commit_logs }}"
