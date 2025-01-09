@@ -16,21 +16,17 @@ jobs:
     name: Notify to Lark
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      commit_logs: ${{ steps.commit_logs.outputs.commit_logs }}
+      commit_id: ${{steps.meta.outputs.commit_id }}
+      commit_logs: ${{ steps.meta.outputs.commit_logs }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: "Get Github version info"
-        id: version
+        id: meta
         run: |
-          echo "version=${{ github.ref_name }} (commit=`echo ${GITHUB_SHA} | cut -c1-8`)" >> "$GITHUB_OUTPUT"
-
-      - name: "Get commit logs"
-        id: commit_logs
-        run: |
+          echo "commit_id=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_OUTPUT"
           commit_logs=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h(%an) - %s")
           echo "commit_logs=$commit_logs" >> $GITHUB_OUTPUT
         continue-on-error: true
@@ -43,8 +39,8 @@ jobs:
           header_template: "blue"
           header_content: ${{ github.repository }} 待部署通知
           message_env_tag: "devint"
-          message_version: "${{ steps.version.outputs.version }}"
-          message_commit_logs: "${{ steps.commit_logs.outputs.commit_logs }}"
+          message_version: "[${{ github.ref_name }}](${{ github.event.repository.html_url }}/tree/${{ github.head_ref }}) (commit=[${{ steps.meta.outputs.commit_id }}](${{ github.event.repository.html_url }}/commit/${{ github.sha }}))"
+          message_commit_logs: "${{ steps.meta.outputs.commit_logs }}"
 
 
   publish_image:
@@ -58,10 +54,12 @@ jobs:
   deploy_with_k8s:
     name: Deploy to devint on k8s
     uses: './.github/workflows/deploy-to-k8s.yml'
-    needs: publish_image
+    needs:
+      - notify_to_lark
+      - publish_image
     secrets: inherit
     with:
       namespace_k8s: mechain-dev
       release_name: mechain-storage-provider
-      version_info: ${{ needs.notify_to_lark.outputs.version }}
+      version_info: "[${{ github.ref_name }}](${{ github.event.repository.html_url }}/tree/${{ github.head_ref }}) (commit=[${{ needs.notify_to_lark.outputs.commit_id }}](${{ github.event.repository.html_url }}/commit/${{ github.sha }}))"
       commit_info: ${{ needs.notify_to_lark.outputs.commit_logs }}
