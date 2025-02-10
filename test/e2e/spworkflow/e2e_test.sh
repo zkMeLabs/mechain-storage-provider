@@ -39,17 +39,17 @@ function mechain_chain() {
   bash ./deployment/localup/localup.sh all 1 8
   bash ./deployment/localup/localup.sh export_sps 1 8 >sp.json
 
-  # transfer some azkme tokens
+  # transfer some amoca tokens
   transfer_account
 }
 
 #############################################
-# transfer some azkme tokens to test accounts #
+# transfer some amoca tokens to test accounts #
 #############################################
 function transfer_account() {
   set -e
   cd "${workspace}"/mechain/
-  ./build/mechaind tx bank send validator0 "${TEST_ACCOUNT_ADDRESS}" 500000000000000000000azkme --home "${workspace}"/mechain/deployment/localup/.local/validator0 --keyring-backend test --node http://localhost:26657 -y
+  ./build/mechaind tx bank send validator0 "${TEST_ACCOUNT_ADDRESS}" 500000000000000000000amoca --home "${workspace}"/mechain/deployment/localup/.local/validator0 --keyring-backend test --node http://localhost:26657 -y
   sleep 2
   ./build/mechaind q bank balances "${TEST_ACCOUNT_ADDRESS}" --node http://localhost:26657
 }

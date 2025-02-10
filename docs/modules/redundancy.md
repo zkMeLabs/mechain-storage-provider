@@ -2,7 +2,7 @@
 
 ## Strategy Design
 
-It is assumed that each SP provides more stable service and won’t go offline as enough azkme are staking to be one SP in Mechain. But as there are a few SPs distributed all over the world in Mechain, Mechain still needs to have its own redundancy strategy in case some SP goes offline for some unexpected reasons. 
+It is assumed that each SP provides more stable service and won’t go offline as enough amoca are staking to be one SP in Mechain. But as there are a few SPs distributed all over the world in Mechain, Mechain still needs to have its own redundancy strategy in case some SP goes offline for some unexpected reasons. 
 Considering the data locality, people can get better storage service from the SPs in the same region. So Mechain provides below redundancy strategy:
 
 - Replica and EC are used in the Mechain network; Default EC is 4+2, 4 data chunks and 2 parity chunks.
@@ -21,7 +21,7 @@ Please note the payload data of an object will be split into the same size segme
 
 ## Erasure Code and Data Redundancy
 
-Although each SP may provide a more stable service and won't go offline as enough azkme are staking to be one SP, Mechain still establish its own redundancy strategy to get rid of the dependency on a single SP and support the data availability in a decentralized way. Here below is the basic design idea.
+Although each SP may provide a more stable service and won't go offline as enough amoca are staking to be one SP, Mechain still establish its own redundancy strategy to get rid of the dependency on a single SP and support the data availability in a decentralized way. Here below is the basic design idea.
 
 1. all segments of each object are stored in primary SP as "pieces", which can be regarded as one replica of the object. Users may download this data directly from the primary SP as it is supposed to provide the full data in a low latency way.
 
