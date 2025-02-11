@@ -17,6 +17,11 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}:@github.com/".insteadOf "https://github.com/"
+          go env -w GOPRIVATE=github.com/zkMeLabs
+
       - name: Checkout
         uses: actions/checkout@v4
 
