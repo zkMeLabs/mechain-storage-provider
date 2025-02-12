@@ -1,4 +1,4 @@
-name: publish to Docker Hub
+name: Publish to Docker Hub
 
 on:
   workflow_call:
@@ -67,5 +67,7 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GH_TOKEN }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache

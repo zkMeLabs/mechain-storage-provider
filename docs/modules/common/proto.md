@@ -619,7 +619,7 @@ message MsgUpdateSpStoragePrice {
 
   // sp address
   string sp_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // read price, in azkme wei per charge byte
+  // read price, in amoca wei per charge byte
   string read_price = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -627,7 +627,7 @@ message MsgUpdateSpStoragePrice {
   ];
   // free read quota, in byte
   uint64 free_read_quota = 3;
-  // store price, in azkme wei per charge byte
+  // store price, in amoca wei per charge byte
   string store_price = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
