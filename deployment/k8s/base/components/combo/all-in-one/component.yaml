@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app: sp-all-in-one
   strategy:
-    type: Recreate # if PV and pod are always in the same avaliability zone, change to RollingUpdate
+    type: Recreate # if PV and pod are always in the same availability zone, change to RollingUpdate
   template:
     metadata:
       labels:
@@ -221,7 +221,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
   name: p2p-external
 spec:
-  type: LoadBalancer # p2p requries the loadblancer can reach to pod ip directly, so use nlb instead of alb.
+  type: LoadBalancer # p2p requires the loadblancer can reach to pod ip directly, so use nlb instead of alb.
   ports:
   - port: 9933
     targetPort: 9933
