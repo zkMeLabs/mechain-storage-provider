@@ -16,6 +16,7 @@ import (
 	"github.com/zkMeLabs/mechain-storage-provider/core/spdb"
 	"github.com/zkMeLabs/mechain-storage-provider/core/taskqueue"
 	"go.uber.org/mock/gomock"
+	"gorm.io/gorm"
 )
 
 func TestErrPieceStoreWithDetail(t *testing.T) {
@@ -244,6 +245,7 @@ func TestHandleDoneReceivePieceTask_PieceCountMismatch(t *testing.T) {
 	mockSPDB := spdb.NewMockSPDB(ctrl)
 	r.baseApp.SetGfSpDB(mockSPDB)
 	mockSPDB.EXPECT().GetAllReplicatePieceChecksumOptimized(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil).Times(1)
+	mockSPDB.EXPECT().GetObjectIntegrity(gomock.Any(), gomock.Any()).Return(nil, gorm.ErrRecordNotFound).AnyTimes()
 	_, err := r.HandleDoneReceivePieceTask(context.TODO(), mockTask)
 	assert.NotNil(t, err)
 }
