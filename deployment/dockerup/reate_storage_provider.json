@@ -1,0 +1,35 @@
+{
+  "messages": [
+    {
+      "@type": "/greenfield.sp.MsgCreateStorageProvider",
+      "description": {
+        "moniker": "{moniker}",
+        "identity": "{identity}",
+        "website": "{website}",
+        "security_contact": "{security_contract}",
+        "details": "{details}"
+      },
+      "sp_address": "{operator_address}",
+      "funding_address": "{funding_address}",
+      "seal_address": "{seal_address}",
+      "approval_address": "{approval_address}",
+      "gc_address": "{gc_address}",
+      "maintenance_address": "{maintenance_address}",
+      "endpoint": "https://{your_endpoint}",
+      "deposit": {
+        "denom": "azkme",
+        "amount": "500000000000000000000"
+      },
+      "read_price": "0.1469890427",
+      "store_price": "0.02183945725",
+      "free_read_quota": 1073741824,
+      "creator": "0x7b5Fe22B5446f7C62Ea27B8BD71CeF94e03f3dF2",
+      "bls_key": "{bls_pub_key}",
+      "bls_proof": "{bls_proof}"
+    }
+  ],
+  "metadata": "4pIMOgIGx1vZGU=",
+  "title": "Create <name> Storage Provider",
+  "summary": "create <name> Storage Provider",
+  "deposit": "1000000000000000000BNB"
+}
