@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	sptypes "github.com/evmos/evmos/v12/x/sp/types"
 	storagetypes "github.com/evmos/evmos/v12/x/storage/types"
@@ -1001,7 +1002,12 @@ func (g *GateModular) getRecoverPiece(ctx context.Context, objectInfo *storagety
 	pieceData, err := g.baseApp.GfSpClient().GetPiece(ctx, pieceTask)
 	if err != nil {
 		log.CtxErrorw(ctx, "failed to download piece", "error", err)
-		return nil, downloader.ErrPieceStoreWithDetail("failed to download piece, error: " + err.Error())
+		pieceStoreErrDetail := "failed to download piece, error: " + err.Error()
+		if isErrNoSuchKey(err) {
+			return nil, downloader.ErrPieceStoreNoSuchKeyWithDetail(pieceStoreErrDetail)
+		} else {
+			return nil, downloader.ErrPieceStoreWithDetail(pieceStoreErrDetail)
+		}
 	}
 
 	return pieceData, nil
@@ -1092,7 +1098,12 @@ func (g *GateModular) getRecoverSegment(ctx context.Context, objectInfo *storage
 		pieceData, err := g.baseApp.GfSpClient().GetPiece(ctx, pieceTask)
 		if err != nil {
 			log.CtxErrorw(ctx, "failed to download piece", "error", err)
-			return nil, downloader.ErrPieceStoreWithDetail("failed to download piece, error: " + err.Error())
+			pieceStoreErrDetail := "failed to download piece, error: " + err.Error()
+			if isErrNoSuchKey(err) {
+				return nil, downloader.ErrPieceStoreNoSuchKeyWithDetail(pieceStoreErrDetail)
+			} else {
+				return nil, downloader.ErrPieceStoreWithDetail(pieceStoreErrDetail)
+			}
 		}
 		return pieceData, nil
 	}
@@ -1117,4 +1128,9 @@ func (g *GateModular) getRecoverSegment(ctx context.Context, objectInfo *storage
 	}
 
 	return ecData[redundancyIdx], nil
+}
+
+func isErrNoSuchKey(err error) bool {
+	msg := err.Error()
+	return strings.Contains(msg, s3.ErrCodeNoSuchKey)
 }

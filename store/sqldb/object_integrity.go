@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -230,10 +231,17 @@ func (s *SpDBImpl) DeleteObjectIntegrity(objectID uint64, redundancyIndex int32)
 	}()
 
 	shardTableName := GetIntegrityMetasTableName(objectID)
-	err = s.db.Table(shardTableName).Delete(&IntegrityMetaTable{
-		ObjectID:        objectID, // should be the primary key
-		RedundancyIndex: redundancyIndex,
-	}).Error
+	if redundancyIndex == math.MaxInt32 {
+		// delete any integrity meta related with object id
+		err = s.db.Table(shardTableName).Delete(&IntegrityMetaTable{
+			ObjectID: objectID, // should be the primary key
+		}).Error
+	} else {
+		err = s.db.Table(shardTableName).Delete(&IntegrityMetaTable{
+			ObjectID:        objectID, // should be the primary key
+			RedundancyIndex: redundancyIndex,
+		}).Error
+	}
 	return err
 }
 
