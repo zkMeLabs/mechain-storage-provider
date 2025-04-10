@@ -28,7 +28,7 @@ const (
 	MaxExpiryAgeInSec         int32  = commonhttp.MaxExpiryAgeInSec // 7 days
 	ExpiryDateFormat          string = time.RFC3339
 	ExpectedEddsaPubKeyLength int    = 64
-	SignedContentV2Pattern           = `(.+) wants you to sign in with your Mechain account:\n*(.+)\n*Register your identity public key (.+)\n*URI: (.+)\n*Version: (.+)\n*Chain ID: (.+)\n*Issued At: (.+)\n*Expiration Time: (.+)`
+	SignedContentV2Pattern           = `(.+) wants you to sign in with your Moca Chain account:\n*(.+)\n*Register your identity public key (.+)\n*URI: (.+)\n*Version: (.+)\n*Chain ID: (.+)\n*Issued At: (.+)\n*Expiration Time: (.+)`
 )
 
 type RequestNonceResp struct {
